@@ -1111,39 +1111,32 @@ JsonParserGeneratorRK::jsmntok_t JsonModifier::tokenWithQuotes(const JsonParserG
 }
 
 int JsonModifier::findLeftComma(const JsonParserGeneratorRK::jsmntok_t *tok) const {
+    JsonParserGeneratorRK::jsmntok_t expandedToken = tokenWithQuotes(tok);
 
-	JsonParserGeneratorRK::jsmntok_t expandedToken = tokenWithQuotes(tok);
+    // Keep as int since we need to check for negative values
+    int ii = expandedToken.start - 1;
+    while(ii >= 0 && jp.getBuffer()[ii] == ' ') {
+        // Whitespace
+        ii--;
+    }
 
-	int ii = expandedToken.start - 1;
-	while(ii >= 0 && jp.getBuffer()[ii] == ' ') {
-		// Whitespace
-		ii--;
-	}
-	// printf("after whitespace check ii=%d c=%c\n", ii, jp.getBuffer()[ii]);
-
-	if (ii < 0 || jp.getBuffer()[ii] != ',') {
-		return -1;
-	}
-
-
-	return ii;
+    return (ii >= 0 && jp.getBuffer()[ii] == ',') ? ii : -1;
 }
 
 int JsonModifier::findRightComma(const JsonParserGeneratorRK::jsmntok_t *tok) const {
-	JsonParserGeneratorRK::jsmntok_t expandedToken = tokenWithQuotes(tok);
+    JsonParserGeneratorRK::jsmntok_t expandedToken = tokenWithQuotes(tok);
 
-	int ii = expandedToken.end;
-	while(ii < jp.getOffset() && jp.getBuffer()[ii] == ' ') {
-		// Whitespace
-		ii++;
-	}
+    // Use size_t since we're only going forward
+    size_t ii = expandedToken.end;
+    while(ii < jp.getOffset() && jp.getBuffer()[ii] == ' ') {
+        // Whitespace
+        ii++;
+    }
 
-	if (ii < 0 || jp.getBuffer()[ii] != ',') {
-		return -1;
-	}
-
-	return ii;
+    return (ii < jp.getOffset() && jp.getBuffer()[ii] == ',') ? ii : -1;
 }
+
+
 
 
 
